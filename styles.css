@@ -39,7 +39,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 40px;
+    font-size: 32px;
     background-color: rgba(16, 16, 16, 0.8);
     padding: 20px 40px;
     color: #ffffff;
@@ -49,6 +49,10 @@
     border-radius: 16px;
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+#game-over-screen #best-score-text {
+    font-size: 24px;
 }
 
 .hidden {
@@ -68,6 +72,21 @@
 }
 #restart-button:hover {
     background: #ff7979;
+}
+
+#home-button {
+    margin-top: 10px;
+    padding: 10px 24px;
+    font-size: 18px;
+    background: #9c9c9c;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#home-button:hover {
+    background: #45a049;
 }
 
 
@@ -93,23 +112,21 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, #eb8787, #150303);
+    background: linear-gradient(135deg, #b422b4, #603a99);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 10;
-    color: black;
+    color: rgb(255, 255, 255);
+    font-family: 'Arial', sans-serif;
 }
 
 #start-screen h1 {
     font-size: 36px;
     margin-bottom: 20px;
-}
-
-
-#character-selection {
-
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    text-transform: capitalize;
 }
 
 .character {
@@ -156,4 +173,9 @@
 .selected {
     border: 3px solid #4CAF50 !important;
     box-shadow: 0 0 10px #4CAF50;
+}
+
+#stats-container {
+  margin-top: 40px;
+  text-align: center;
 }

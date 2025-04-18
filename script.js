@@ -7,6 +7,54 @@ let positionY = 0;
 let isJumping = false;
 let obstacleGenerationTimeout;
 
+let selectedCharacter = localStorage.getItem("lastSelectedCharacter") || "gundam-blanc"; // Default character or last selected
+
+let stats = JSON.parse(localStorage.getItem("stats")) || {
+  scores: [],
+  victories: [],
+  characters: {}, // { "gundam-blanc": 3, "gundam-bleu": 1, ... }
+};
+
+winScore = 70; // Score pour gagner
+
+const getNombreParties = () => stats.scores.length;
+
+const getScoreMoyen = () => {
+    if (stats.scores.length === 0) return 0;
+    return (stats.scores.reduce((acc, val) => acc + val, 0) / stats.scores.length).toFixed(2);
+};
+
+const getTopScore = () => {
+  if (stats.scores.length === 0) return 0;
+  return Math.max(...stats.scores);
+};
+
+const getPersoPrincipal = () => {
+  const entries = Object.entries(stats.characters);
+  if (entries.length === 0) return "Aucun";
+  return entries.reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+};
+
+const getTauxVictoire = () => {
+  if (stats.victories.length === 0) return "0%";
+  const wins = stats.victories.filter((vic) => vic === true).length;
+  const total = stats.victories.length;
+  return ((wins / total) * 100).toFixed(1) + "%";
+};
+
+const afficherStatsAccueil = () => {
+  document.getElementById("nb-parties")
+  .textContent = `Parties jouées : ${getNombreParties()}`;
+  document.getElementById("score-moyen")
+  .textContent = `Score moyen : ${getScoreMoyen()}`;
+  document.getElementById("top-score").
+  textContent = `Meilleur score : ${getTopScore()}`;
+  document.getElementById("taux-victoire")
+  .textContent = `Taux de victoire : ${getTauxVictoire()}`;
+  document.getElementById("perso-populaire")
+  .textContent = `Personnage le plus joué : ${getPersoPrincipal()}`;
+};
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "ArrowRight" || event.key === "z") positionX += 10;
   if (event.key === "ArrowLeft" || event.key === "s") positionX -= 10;
@@ -53,14 +101,22 @@ const createBomb = () => {
 
   const moveInterval = setInterval(() => {
     if (position < 0) {
-        score += 5;
+      score += 5;
       clearInterval(moveInterval);
       bomb.remove();
     } else {
       position -= 5;
       bomb.style.left = position + "px";
 
-      if (checkCollision(player, bomb)) {
+      const collisionResult = checkCollision(player, bomb);
+      
+      if (collisionResult === "jump") {
+        // Le joueur a sauté sur la bombe
+        clearInterval(moveInterval);
+        bomb.remove();
+        // Les points sont déjà ajoutés dans la fonction checkCollision
+      } else if (collisionResult === true) {
+        // Collision normale
         clearInterval(moveInterval);
         bomb.remove();
 
@@ -80,7 +136,7 @@ const createBomb = () => {
     if (gameOver) bomb.remove();
   }, 20);
 };
- 
+
 const getObstacleDelay = () => {
   if (score > 40) return 1000;
   if (score > 20) return 1750;
@@ -98,6 +154,18 @@ const loopObstacleGeneration = () => {
 const checkCollision = (player, obstacle) => {
   const playerRect = player.getBoundingClientRect();
   const obstacleRect = obstacle.getBoundingClientRect();
+  
+  // Le joueur saute sur l'obstacle
+  if (playerRect.bottom < obstacleRect.top + 10 &&
+      playerRect.bottom > obstacleRect.top - 10 &&
+      playerRect.right > obstacleRect.left &&
+      playerRect.left < obstacleRect.right) {
+    // L'obstacle est détruit, le joueur gagne 5 + 3 points bonus
+    score += 8;
+    updateHUD();
+    return "jump";
+  }
+  
   return !(
     playerRect.top > obstacleRect.bottom ||
     playerRect.bottom < obstacleRect.top ||
@@ -110,6 +178,19 @@ const showGameOver = () => {
   const screen = document.getElementById("game-over-screen");
   screen.classList.remove("hidden");
   screen.style.display = "block";
+
+  const isWin = score >= winScore;
+  stats.scores.push(score);
+  stats.victories.push(isWin);
+  if (!stats.characters[selectedCharacter])
+    stats.characters[selectedCharacter] = 0;
+  stats.characters[selectedCharacter]++;
+  localStorage.setItem("stats", JSON.stringify(stats));
+
+  const best = getTopScore();
+  const bestText = document.getElementById("best-score-text");
+  if (bestText) bestText.textContent = `Meilleur score : ${best}`;
+
   console.log("Le joueur a perdu");
 };
 
@@ -117,9 +198,9 @@ const startGame = () => {
   if (obstacleGenerationTimeout) {
     clearTimeout(obstacleGenerationTimeout);
   }
-  
-  document.querySelectorAll('.bomb').forEach(bomb => bomb.remove());
-  
+
+  document.querySelectorAll(".bomb").forEach((bomb) => bomb.remove());
+
   lives = 3;
   score = 0;
   updateHUD();
@@ -128,11 +209,11 @@ const startGame = () => {
   positionX = 50;
   positionY = 0;
   player.style.bottom = "0px";
-  
+
   const screen = document.getElementById("game-over-screen");
   screen.classList.add("hidden");
   screen.style.display = "none";
-  
+
   loopObstacleGeneration();
 };
 
@@ -146,18 +227,24 @@ document.querySelector("#start-btn").addEventListener("click", () => {
 
 document.querySelectorAll(".character").forEach((char) => {
   char.addEventListener("click", () => {
-    document.querySelectorAll(".character").forEach(c => c.classList.remove("selected"));
-    
+    document
+      .querySelectorAll(".character")
+      .forEach((c) => c.classList.remove("selected"));
+
     char.classList.add("selected");
-    
+
     const characterType = char.dataset.character;
-    
-    if (characterType === 'gundam-blanc') {
+
+    if (!stats.characters[characterType]) stats.characters[characterType] = 0;
+    selectedCharacter = characterType;
+    localStorage.setItem("lastSelectedCharacter", characterType); // Sauvegarde du dernier personnage choisi
+
+    if (characterType === "gundam-blanc") {
       player.style.backgroundImage = `url('assets/${characterType}.webp')`;
     } else {
       player.style.backgroundImage = `url('assets/${characterType}.webp')`;
     }
-    
+
     console.log(`Personnage sélectionné: ${characterType}`);
   });
 });
@@ -176,3 +263,20 @@ setInterval(() => {
     updateHUD();
   }
 }, 1000);
+
+window.addEventListener("DOMContentLoaded", () => {
+  afficherStatsAccueil();
+  
+  const savedCharacter = localStorage.getItem("lastSelectedCharacter") || "gundam-blanc"; // Default character
+  selectedCharacter = savedCharacter;
+  
+  player.style.backgroundImage = `url('assets/${savedCharacter}.webp')`;
+  
+  document.querySelectorAll('.character').forEach(char => {
+    if (char.dataset.character === savedCharacter) {
+      char.classList.add('selected');
+    } else {
+      char.classList.remove('selected');
+    }
+  });
+});
