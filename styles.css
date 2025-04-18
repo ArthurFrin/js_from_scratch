@@ -151,6 +151,12 @@
     background-image: url('../assets/gundam-rouge.webp');
 }
 
+.selection-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
 #start-btn {
     margin-top: 20px;
     padding: 12px 28px;
