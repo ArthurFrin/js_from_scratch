@@ -6,6 +6,48 @@ let positionY = 0;
 
 let isJumping = false;
 let obstacleGenerationTimeout;
+let gameMusic;
+
+// Fonction pour jouer la musique du jeu
+const playGameMusic = () => {
+  if (!gameMusic) {
+    gameMusic = new Audio('assets/arcade-beat.mp3');
+    gameMusic.loop = true;
+    gameMusic.volume = 0.3; // Volume à 50%
+  }
+  gameMusic.currentTime = 0;
+  gameMusic.play().catch(err => console.log('Autoplay prevented:', err));
+};
+
+const stopGameMusic = () => {
+  if (gameMusic) {
+    gameMusic.pause();
+  }
+};
+
+const playGameOverSound = () => {
+  const gameOverSound = new Audio('assets/game-over.mp3');
+  gameOverSound.volume = 0.1;
+  gameOverSound.play().catch(err => console.log('Sound play prevented:', err));
+};
+
+const playDamageSound = () => {
+  const damageSound = new Audio('assets/damage.mp3');
+  damageSound.volume = 0.5;
+  damageSound.play().catch(err => console.log('Sound play prevented:', err));
+};
+
+const playBonusKillSound = () => {
+  const bonusKillSound = new Audio('assets/bonus-kill.mp3');
+  bonusKillSound.volume = 0.3;
+  bonusKillSound.play().catch(err => console.log('Sound play prevented:', err));
+};
+
+const playJumpSound = () => {
+  const jumpSound = new Audio('assets/jump.mp3');
+  jumpSound.volume = 0.4;
+  jumpSound.play().catch(err => console.log('Jump sound play prevented:', err));
+};
 
 let selectedCharacter = localStorage.getItem("lastSelectedCharacter") || "gundam-blanc"; // Default character or last selected
 
@@ -66,6 +108,9 @@ document.addEventListener("keydown", (event) => {
 const jump = () => {
   if (isJumping) return;
   isJumping = true;
+  
+  // Jouer le son de saut
+  playJumpSound();
 
   let upIntervale = setInterval(() => {
     if (positionY >= 200) {
@@ -111,17 +156,16 @@ const createBomb = () => {
       const collisionResult = checkCollision(player, bomb);
       
       if (collisionResult === "jump") {
-        // Le joueur a sauté sur la bombe
         clearInterval(moveInterval);
         bomb.remove();
-        // Les points sont déjà ajoutés dans la fonction checkCollision
+        playBonusKillSound();
       } else if (collisionResult === true) {
-        // Collision normale
         clearInterval(moveInterval);
         bomb.remove();
 
         if (!gameOver) {
           lives--;
+          playDamageSound();
           updateHUD();
 
           if (lives <= 0) {
@@ -163,6 +207,7 @@ const checkCollision = (player, obstacle) => {
     // L'obstacle est détruit, le joueur gagne 5 + 3 points bonus
     score += 8;
     updateHUD();
+    playBonusKillSound();
     return "jump";
   }
   
@@ -178,6 +223,9 @@ const showGameOver = () => {
   const screen = document.getElementById("game-over-screen");
   screen.classList.remove("hidden");
   screen.style.display = "block";
+
+  stopGameMusic();
+  playGameOverSound();
 
   const isWin = score >= winScore;
   stats.scores.push(score);
@@ -209,6 +257,9 @@ const startGame = () => {
   positionX = 50;
   positionY = 0;
   player.style.bottom = "0px";
+
+  // Jouer la musique du jeu
+  playGameMusic();
 
   const screen = document.getElementById("game-over-screen");
   screen.classList.add("hidden");
