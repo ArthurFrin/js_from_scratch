@@ -1,17 +1,17 @@
 document.getElementById('submitBtn').addEventListener('click', function() {
-    const birthYear = parseInt(document.getElementById('birthyear').value, 10);
-    if (isNaN(birthYear)) {
-        alert('Please enter a valid year.');
+    const age = parseInt(document.getElementById('age').value, 10);
+    if (isNaN(age)) {
+        alert('Veuillez entrer un âge valide.');
         return;
     }
     let message = '';
-    if (birthYear > 2018) {
+    if (age < 7) {
         message = 'Lilo et Stitch';
     }
-    if (birthYear <= 2018 && birthYear > 1980) {
+    if (age >= 7 && age <= 45) {
         message = 'Matrix';
     }
-    if (birthYear <= 1980) {
+    if (age > 45) {
         message = 'Ben-Hur';
     }
     alert(message);
