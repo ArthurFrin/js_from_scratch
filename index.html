@@ -8,12 +8,31 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <label for="age">Entrez votre âge :</label>
-        <input type="number" id="age" name="age" min="1" max="120">
-        <button id="submitBtn">Valider</button>
-        <p id="result"></p>
+    <div id="start-screen">
+        <h1>Bomb Runner</h1>
+        <div id="character-selection">
+            <h2>Choisissez votre personnage</h2>
+            <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                <div class="character selected" data-character="gundam-blanc"></div>
+                <div class="character" data-character="gundam-bleu"></div>
+                <div class="character" data-character="gundam-rouge"></div>
+            </div>
+        </div>
+        <button id="start-btn">Commencer</button>
     </div>
+    
+    <div id="game" class="hidden">
+        <div id="livesDisplay">❤️❤️❤️</div>
+        <div id="scoreDisplay"></div>
+        <div id="player"></div>
+        <div id="game-over-screen">
+            <h1 id="game-over-text">Game Over</h1>
+            <button onclick="startGame()" id="restart-button">restart</button>
+        </div>
+        
+    </div>
+
+    
     
 </body>
 </html>
