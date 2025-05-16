@@ -98,10 +98,9 @@ const getScoreMoyen = () => {
     if (stats.scores.length === 0) return 0;
     return (stats.scores.reduce((acc, val) => acc + val, 0) / stats.scores.length).toFixed(2);
 };
-
 const getTopScore = () => {
   if (stats.scores.length === 0) return 0;
-  return Math.max(...stats.scores);
+  return stats.scores.map(score => score).reduce((max, curr) => curr > max ? curr : max, stats.scores[0]);
 };
 
 const getPersoPrincipal = () => {
