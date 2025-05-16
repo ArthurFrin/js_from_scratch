@@ -1,0 +1,25 @@
+{
+  "name": "js_from_scratch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArthurFrin/js_from_scratch.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/ArthurFrin/js_from_scratch/issues"
+  },
+  "homepage": "https://github.com/ArthurFrin/js_from_scratch#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

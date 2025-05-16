@@ -101,12 +101,34 @@ const createBomb = () => {
 
 const getObstacleDelay = () => {
   let baseDelay;
-  if (score > 40) baseDelay = 1000;
-  else if (score > 20) baseDelay = 1750;
-  else baseDelay = 2500;
-  // Ajoute un peu d'aléatoire (+/- 400ms)
+
+  if (score > 300) {
+    baseDelay = 400;
+    console.log("Difficulté : Très difficile");
+  } else if (score > 250) {
+    baseDelay = 600;
+    console.log("Difficulté : Difficile");
+  } else if (score > 200) {
+    baseDelay = 1000;
+    console.log("Difficulté : Moyenne+");
+  } else if (score > 100) {
+    baseDelay = 1500;
+    console.log("Difficulté : Moyenne");
+  } else if (score > 50) {
+    baseDelay = 1800;
+    console.log("Difficulté : Facile+");
+  } else if (score > 5) {
+    baseDelay = 2100;
+    console.log("Difficulté : Facile");
+  } else {
+    baseDelay = 2500;
+    console.log("Difficulté : Très facile");
+  }
+  // On ajoute un délai aléatoire entre -200 et +200ms
   return baseDelay + Math.floor(Math.random() * 400) - 200;
 };
+
+
 
 const loopObstacleGeneration = () => {
   if (!gameOver) {
