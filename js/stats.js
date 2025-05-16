@@ -5,7 +5,7 @@ let stats = JSON.parse(localStorage.getItem("stats")) || {
 };
 
 let selectedCharacter = localStorage.getItem("lastSelectedCharacter") || "gundam-blanc";
-const winScore = 200; // Score à atteindre pour gagner
+const winScore = 300; // Score à atteindre pour gagner
 
 const getNombreParties = () => stats.scores.length;
 
