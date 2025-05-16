@@ -1,54 +1,61 @@
-// Main module - Point d'entrée principal du jeu
-
 import { loadVolumeSettings, playGameMusic, initAudioListeners } from './audio.js';
 import { initPlayer, jump, moveLeft, moveRight, resetPlayerPosition } from './player.js';
 import { afficherStatsAccueil } from './stats.js';
 import { loopObstacleGeneration, resetGame, incrementScore, setUICallbacks } from './obstacles.js';
 import { updateHUD, initCharacterSelection, selectSavedCharacter, showGameOver } from './ui.js';
+import { loopPlatformGeneration, resetPlatforms } from './platforms.js';
 
-// Initialiser le jeu
+//fonction pour créer des étoiles dans le fond du jeu
+function createStars(nb = 80) {
+  const container = document.getElementById('game-container');
+  if (!container) return;
+  container.querySelectorAll('.star').forEach(e => e.remove());
+  for (let i = 0; i < nb; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + 'vw';
+    star.style.top = Math.random() * 100 + 'vh';
+    star.style.opacity = (Math.random() * 0.5 + 0.5).toFixed(2);
+    star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
+    container.appendChild(star);
+  }
+}
+
 const initGame = () => {
-  // Connecter les modules avec des callbacks pour éviter les dépendances circulaires
   setUICallbacks(updateHUD, showGameOver);
   
-  // Initialiser le joueur
   initPlayer();
   
-  // Afficher les statistiques
   afficherStatsAccueil();
   
-  // Sélectionner le personnage sauvegardé
   selectSavedCharacter();
   
-  // Charger les paramètres audio
   loadVolumeSettings();
   
-  // Initialiser les écouteurs pour l'audio
   initAudioListeners();
   
-  // Initialiser les écouteurs pour la sélection des personnages
   initCharacterSelection();
   
-  // Initialiser les écouteurs pour les contrôles du jeu
   initGameControls();
   
-  // Initialiser les boutons
   initButtons();
   
-  // Démarrer le compteur de score
   startScoreTimer();
 };
 
-// Initialiser les contrôles du jeu
 const initGameControls = () => {
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowRight" || event.key === "z") moveRight();
-    if (event.key === "ArrowLeft" || event.key === "s") moveLeft();
-    if (event.key === " ") jump();
-  });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight" || event.key === "z") moveRight(true);
+        if (event.key === "ArrowLeft" || event.key === "s") moveLeft(true);
+        if (event.key === " ") jump();
+    }); 
+
+    document.addEventListener("keyup", (event) => {
+        if (event.key === "ArrowRight" || event.key === "z") moveRight(false);
+        if (event.key === "ArrowLeft" || event.key === "s") moveLeft(false);
+    });
 };
 
-// Initialiser les boutons
 const initButtons = () => {
   document.querySelector("#restart-button").addEventListener("click", startGame);
 
@@ -59,30 +66,25 @@ const initButtons = () => {
   });
 };
 
-// Démarrer le jeu
 const startGame = () => {
-  // Réinitialiser le jeu
   const { lives, score } = resetGame();
   
-  // Mettre à jour l'affichage
   updateHUD(lives, score);
   
-  // Réinitialiser la position du joueur
   resetPlayerPosition();
   
-  // Jouer la musique du jeu
   playGameMusic();
   
-  // Cacher l'écran de fin de partie
   const screen = document.getElementById("game-over-screen");
   screen.classList.add("hidden");
   screen.style.display = "none";
   
-  // Démarrer la génération d'obstacles
   loopObstacleGeneration();
+  
+  resetPlatforms();
+  loopPlatformGeneration();
 };
 
-// Démarrer le compteur de score
 const startScoreTimer = () => {
   setInterval(() => {
     incrementScore();
@@ -90,4 +92,7 @@ const startScoreTimer = () => {
 };
 
 // Initialiser le jeu lorsque le DOM est chargé
-window.addEventListener("DOMContentLoaded", initGame);
+window.addEventListener("DOMContentLoaded", () => {
+  createStars(80);
+  initGame();
+});

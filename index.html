@@ -5,17 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon projet JS</title>
     <script type="module" src="js/main.js"></script>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div id="game-container">
+    <div id="moon"></div>
 <div id="start-screen">
     <h1>Gundam runner</h1>
     <div id="character-selection">
         <h2>Choisissez un Gundam</h2>
         <div class="selection-container">
-            <div class="character selected" data-character="gundam-blanc"></div>
-            <div class="character" data-character="gundam-bleu"></div>
-            <div class="character" data-character="gundam-rouge"></div>
+            <div class="character" data-character="gundam-blanc" draggable="true"></div>
+            <div class="character" data-character="gundam-bleu" draggable="true"></div>
+            <div class="character" data-character="gundam-rouge" draggable="true"></div>
+        </div>
+        <div id="selected-character-dropzone">
+            <div id="selected-character-label">Perso sélectionné :</div>
+            <div id="selected-character-slot"></div>
         </div>
     </div>
     
@@ -54,9 +61,10 @@
             <h1 id="game-over-text">Game Over</h1>
             <p id="best-score-text">Meilleur score : 0</p>
             <button onclick="location.reload()" id="home-button">Retour à l'accueil</button>
-            <button onclick="startGame()" id="restart-button">restart</button>
+            <button id="restart-button">restart</button>
         </div>
         
+    </div>
     </div>
 
     

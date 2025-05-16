@@ -1,8 +1,8 @@
-// Obstacles module - Gestion des obstacles
 
 import { playBonusKillSound, playDamageSound } from './audio.js';
 import { playerElement } from './player.js';
 
+let bombCombo = 0;
 let obstacleGenerationTimeout;
 let gameOver = false;
 let lives = 3;
@@ -10,17 +10,33 @@ let score = 0;
 let updateHUDCallback = null;
 let showGameOverCallback = null;
 
-// Définir les callbacks pour les fonctions UI
 const setUICallbacks = (updateHUDFunc, showGameOverFunc) => {
   updateHUDCallback = updateHUDFunc;
   showGameOverCallback = showGameOverFunc;
 };
 
-// Créer un obstacle (bombe)
+// Créer un obstacle (bombe) avec hauteur aléatoire sur 5 paliers, 1er palier beaucoup plus fréquent
 const createBomb = () => {
   const bomb = document.createElement("div");
   bomb.classList.add("bomb");
   document.querySelector("#game").appendChild(bomb);
+
+  const bombHeights = [0, 110, 160, 210, 260];
+  const bombProbas = [0.65, 0.22, 0.08, 0.035, 0.015];
+
+  const r = Math.random();
+  let acc = 0;
+  let chosenIndex = 0;
+  for (let i = 0; i < bombProbas.length; i++) {
+    acc += bombProbas[i];
+    if (r < acc) {
+      chosenIndex = i;
+      break;
+    }
+  }
+
+  const bombHeight = bombHeights[chosenIndex];
+  bomb.style.bottom = bombHeight + "px";
 
   let position = 800;
   bomb.style.left = position + "px";
@@ -40,7 +56,28 @@ const createBomb = () => {
         clearInterval(moveInterval);
         bomb.remove();
         playBonusKillSound();
+
+        bombCombo++;
+        if (bombCombo >= 3) {
+          // Combo réussi :détruit toutes les bombes à l'écran et on donne 20 points
+          const gameContainer = document.querySelector('#game');
+          if (gameContainer) {
+            const children = gameContainer.children;
+            for (let i = 0; i < children.length; i++) {
+              const child = children[i];
+              if (child.classList.contains('bomb')) {
+                child.classList.add('explosion');
+                setTimeout(() => child.remove(), 500);
+              }
+            }
+          }
+          score += 20;
+          if (updateHUDCallback) updateHUDCallback(lives, score);
+          bombCombo = 0;
+        }
       } else if (collisionResult === true) {
+        // Reset combo et perte de vie
+        bombCombo = 0;
         clearInterval(moveInterval);
         bomb.remove();
 
@@ -62,14 +99,15 @@ const createBomb = () => {
   }, 20);
 };
 
-// Calculer le délai entre la génération des obstacles en fonction du score
 const getObstacleDelay = () => {
-  if (score > 40) return 1000;
-  if (score > 20) return 1750;
-  return 2500;
+  let baseDelay;
+  if (score > 40) baseDelay = 1000;
+  else if (score > 20) baseDelay = 1750;
+  else baseDelay = 2500;
+  // Ajoute un peu d'aléatoire (+/- 400ms)
+  return baseDelay + Math.floor(Math.random() * 400) - 200;
 };
 
-// Boucle de génération d'obstacles
 const loopObstacleGeneration = () => {
   if (!gameOver) {
     createBomb();
@@ -78,7 +116,6 @@ const loopObstacleGeneration = () => {
   }
 };
 
-// Vérifier les collisions entre le joueur et un obstacle
 const checkCollision = (player, obstacle) => {
   const playerRect = player.getBoundingClientRect();
   const obstacleRect = obstacle.getBoundingClientRect();
@@ -103,7 +140,6 @@ const checkCollision = (player, obstacle) => {
   );
 };
 
-// Réinitialiser les variables de jeu
 const resetGame = () => {
   if (obstacleGenerationTimeout) {
     clearTimeout(obstacleGenerationTimeout);
@@ -118,7 +154,6 @@ const resetGame = () => {
   return { lives, score };
 };
 
-// Incrémenter le score
 const incrementScore = () => {
   if (!gameOver) {
     score += 1;
@@ -126,7 +161,6 @@ const incrementScore = () => {
   }
 };
 
-// Export des fonctions et variables pour les rendre disponibles aux autres modules
 export {
   createBomb,
   loopObstacleGeneration,
